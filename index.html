@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#7c3aed">
+<title>Nirmala Sadan Booking Manager</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1f2937;background:#f6f7fb}
+*{box-sizing:border-box}body{margin:0}header{background:#6d28d9;color:#fff;padding:18px 16px}
+header h1{font-size:20px;margin:0}header p{margin:4px 0 0;font-size:13px;opacity:.9}
+main{max-width:900px;margin:auto;padding:16px}.card{background:#fff;border-radius:16px;padding:16px;margin:0 0 14px;box-shadow:0 2px 12px #1111}
+h2{font-size:18px;margin:0 0 12px}.muted{color:#6b7280;font-size:13px}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 5px}
+input,select,button{font:inherit}input,select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+button{border:0;border-radius:10px;padding:12px 16px;background:#6d28d9;color:#fff;font-weight:650;cursor:pointer}
+button.secondary{background:#ede9fe;color:#5b21b6}button.danger{background:#fee2e2;color:#991b1b}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid .wide{grid-column:1/-1}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.stat{background:#f5f3ff;padding:12px;border-radius:12px}.stat b{display:block;font-size:24px;color:#5b21b6}
+.hidden{display:none!important}.booking{border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:9px 0}
+.pill{display:inline-block;border-radius:999px;padding:3px 9px;font-size:12px;background:#ede9fe;color:#5b21b6}
+.notice{padding:10px;border-radius:10px;background:#fffbeb;color:#92400e;font-size:13px}
+#message{margin:10px 0;font-size:14px}.success{color:#047857}.error{color:#b91c1c}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.grid .wide{grid-column:auto}main{padding:12px}}
+</style>
+</head>
+<body>
+<header><h1>Nirmala Sadan Booking Manager</h1><p>7 कमरों का बुकिंग और भुगतान रिकॉर्ड</p></header>
+<main>
+<section id="loginCard" class="card">
+<h2>Admin Login</h2>
+<p class="muted">केवल अधिकृत Admin लॉगिन कर सकता है। नया अकाउंट यहाँ नहीं बनाया जा सकता।</p>
+<label>Admin Email</label><input id="email" type="email" autocomplete="username" placeholder="आपका Admin email">
+<label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="अपना पासवर्ड">
+<div class="row" style="margin-top:14px"><button id="loginBtn">Login</button><span class="muted">पासवर्ड निजी रखें</span></div>
+</section>
+<div id="message" role="status" style="margin:10px 4px;font-size:14px"></div>
+
+<section id="app" class="hidden">
+<div class="card">
+<div class="row"><div><h2>आज की स्थिति</h2><div class="muted" id="todayLabel"></div></div><button class="secondary" id="logoutBtn">Logout</button></div>
+<div class="grid" style="margin-top:12px">
+<div class="stat"><b id="occupiedToday">0</b><span>आज occupied कमरे</span></div>
+<div class="stat"><b id="availableToday">7</b><span>आज खाली कमरे</span></div>
+</div>
+</div>
+
+<div class="card">
+<h2>तारीख के अनुसार कमरे जाँचें</h2>
+<div class="grid">
+<div><label>Check-in</label><input id="searchIn" type="date"></div>
+<div><label>Check-out</label><input id="searchOut" type="date"></div>
+<div class="wide"><button id="checkAvailability" style="width:100%">खाली कमरे देखें</button></div>
+</div>
+<div id="availabilityResult" class="muted" style="margin-top:10px">तारीख चुनकर खाली कमरे देखें।</div>
+</div>
+
+<div class="card">
+<h2>नई Booking जोड़ें</h2>
+<div class="grid">
+<div><label>ग्राहक का नाम *</label><input id="guest" placeholder="पूरा नाम"></div>
+<div><label>मोबाइल नंबर</label><input id="phone" inputmode="tel" placeholder="मोबाइल नंबर"></div>
+<div><label>कमरा नंबर *</label><select id="room"><option value="">कमरा चुनें</option><option>Room 1</option><option>Room 2</option><option>Room 3</option><option>Room 4</option><option>Room 5</option><option>Room 6</option><option>Room 7</option></select></div>
+<div><label>Room Type</label><select id="roomType"><option>Double Bed</option><option>Triple Bed</option><option>Family Room</option><option>Deluxe AC</option><option>Other</option></select></div>
+<div><label>Check-in *</label><input id="checkIn" type="date"></div>
+<div><label>Check-out *</label><input id="checkOut" type="date"></div>
+<div><label>कुल किराया (₹) *</label><input id="total" type="number" min="0" placeholder="जैसे 1500"></div>
+<div><label>Advance (₹)</label><input id="advance" type="number" min="0" value="0"></div>
+<div class="wide"><label>नोट</label><input id="notes" placeholder="अतिरिक्त जानकारी (वैकल्पिक)"></div>
+<div class="wide"><button id="saveBooking" style="width:100%">Booking Save करें</button></div>
+</div>
+<div class="notice" style="margin-top:10px">Check-out की तारीख को कमरा अगली booking के लिए उपलब्ध माना जाएगा। एक ही कमरे की overlapping booking सेव नहीं होगी।</div>
+</div>
+
+<div class="card">
+<div class="row"><h2>Booking रिकॉर्ड</h2><button class="secondary" id="refreshBtn">Refresh</button></div>
+<div id="bookingList" class="muted">लोड हो रहा है...</div>
+</div>
+</section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAXXNZOTJlbgZPF1MrzNVqqX-ijLwGUVGg",
+  authDomain: "nirmala-sadan-home-stay.firebaseapp.com",
+  projectId: "nirmala-sadan-home-stay",
+  storageBucket: "nirmala-sadan-home-stay.firebasestorage.app",
+  messagingSenderId: "655992243314",
+  appId: "1:655992243314:web:a3d377a005d42e573deeeb",
+  measurementId: "G-5RJNYEPKLP"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+let bookings = [];
+let stopBookingsListener = null;
+
+function msg(t, type="") { $("message").textContent=t; $("message").className=type; }
+function dateToday(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+function overlaps(aIn,aOut,bIn,bOut){return aIn < bOut && bIn < aOut;}
+function rupees(n){return "₹"+Number(n||0).toLocaleString("en-IN");}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function startBookingsListener(){
+  if(stopBookingsListener) stopBookingsListener();
+  stopBookingsListener = onSnapshot(query(collection(db,"bookings"),orderBy("checkIn","asc")), snap=>{
+    bookings=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderBookings(); renderToday();
+  }, error=>msg("डेटा लोड नहीं हुआ: "+error.message,"error"));
+}
+function renderToday(){
+  const today=dateToday();
+  const occupied=bookings.filter(b=>b.checkIn<=today && today<b.checkOut).length;
+  $("occupiedToday").textContent=occupied;
+  $("availableToday").textContent=Math.max(0,7-occupied);
+  $("todayLabel").textContent=new Date().toLocaleDateString("hi-IN",{dateStyle:"full"});
+}
+function renderBookings(){
+  const el=$("bookingList");
+  if(!bookings.length){el.textContent="अभी कोई booking दर्ज नहीं है।";return;}
+  el.innerHTML=bookings.map(b=>{
+    const balance=Math.max(0,Number(b.total||0)-Number(b.advance||0));
+    return `<div class="booking">
+      <div class="row"><strong>${escapeHtml(b.guest)}</strong><span class="pill">${escapeHtml(b.room)}</span></div>
+      <div>${escapeHtml(b.roomType||"")} · ${escapeHtml(b.checkIn)} से ${escapeHtml(b.checkOut)}</div>
+      <div class="muted">${escapeHtml(b.phone||"")}${b.notes?" · "+escapeHtml(b.notes):""}</div>
+      <div class="row" style="margin-top:7px"><span>कुल ${rupees(b.total)} · Advance ${rupees(b.advance)} · बाकी ${rupees(balance)}</span><button class="danger" data-delete="${b.id}">Delete</button></div>
+    </div>`;
+  }).join("");
+  el.querySelectorAll("[data-delete]").forEach(btn=>btn.addEventListener("click",async()=>{
+    if(confirm("क्या यह booking हटानी है?")){try{await deleteDoc(doc(db,"bookings",btn.dataset.delete));msg("Booking हटाई गई।","success");}catch(e){msg(e.message,"error");}}
+  }));
+}
+function availableRooms(ci,co,ignoreId=null){
+  return Array.from({length:7},(_,i)=>`Room ${i+1}`).filter(room=>
+    !bookings.some(b=>b.id!==ignoreId && b.room===room && overlaps(ci,co,b.checkIn,b.checkOut))
+  );
+}
+$("loginBtn").addEventListener("click",async()=>{
+  const email=$("email").value.trim(), password=$("password").value;
+  if(!email || !password){msg("कृपया Admin email और password दोनों भरें।","error");return;}
+  const btn=$("loginBtn"); btn.disabled=true; btn.textContent="Login हो रहा है..."; msg("Firebase से संपर्क हो रहा है...");
+  try{await signInWithEmailAndPassword(auth,email,password);msg("");}
+  catch(e){msg("Login नहीं हुआ: "+e.code+" — ईमेल/पासवर्ड जाँचें और इंटरनेट चालू रखें।","error");}
+  finally{btn.disabled=false;btn.textContent="Login";}
+});
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginBtn").click();});
+$("logoutBtn").addEventListener("click",()=>signOut(auth));
+$("refreshBtn").addEventListener("click",async()=>{try{startBookingsListener();msg("रिकॉर्ड अपडेट हो गया।","success");}catch(e){msg("डेटा लोड नहीं हुआ: "+e.message,"error");}});
+$("checkAvailability").addEventListener("click",()=>{
+  const ci=$("searchIn").value,co=$("searchOut").value;
+  if(!ci||!co||co<=ci){$("availabilityResult").textContent="कृपया सही Check-in और Check-out चुनें।";return;}
+  const rooms=availableRooms(ci,co);
+  $("availabilityResult").innerHTML=rooms.length?`खाली कमरे: <strong>${rooms.join(", ")}</strong>`:"इस अवधि में कोई कमरा खाली नहीं है।";
+});
+$("saveBooking").addEventListener("click",async()=>{
+  const guest=$("guest").value.trim(),room=$("room").value,ci=$("checkIn").value,co=$("checkOut").value;
+  const total=Number($("total").value),advance=Number($("advance").value||0);
+  if(!guest||!room||!ci||!co||co<=ci||$("total").value===""||total<0||advance<0||advance>total){msg("कृपया नाम, कमरा, सही तारीख और भुगतान की जानकारी जाँचें।","error");return;}
+  if(bookings.some(b=>b.room===room&&overlaps(ci,co,b.checkIn,b.checkOut))){msg("यह कमरा इन तारीखों में पहले से बुक है। पहले खाली कमरा चुनें।","error");return;}
+  try{
+    await addDoc(collection(db,"bookings"),{
+      guest,phone:$("phone").value.trim(),room,roomType:$("roomType").value,
+      checkIn:ci,checkOut:co,total,advance,notes:$("notes").value.trim(),
+      createdAt:serverTimestamp()
+    });
+    ["guest","phone","room","checkIn","checkOut","total","notes"].forEach(id=>$(id).value="");
+    $("advance").value="0";
+    msg("Booking सफलतापूर्वक सेव हो गई।","success");
+  }catch(e){msg("Booking सेव नहीं हुई: "+e.message,"error");}
+});
+onAuthStateChanged(auth,async user=>{
+  $("loginCard").classList.toggle("hidden",!!user);
+  $("app").classList.toggle("hidden",!user);
+  if(user){startBookingsListener();}
+  else {if(stopBookingsListener){stopBookingsListener();stopBookingsListener=null;}bookings=[];}
+});
+</script>
+</body>
+</html>
